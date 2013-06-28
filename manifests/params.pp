@@ -2,7 +2,58 @@
 class ldap::params {
 
   case $operatingsystem {
-    
+    /(?i:Fedora)/: {
+    $package   = [ 'openldap', 'openldap-clients' ]
+            
+      $prefix    = '/etc/openldap'
+      $config    = 'ldap.conf'
+      $cacertdir = '/etc/openldap/cacerts'
+
+      $server_package  = [ 'openldap-servers' ]
+      $server_config   = 'slapd.conf'
+
+      $service   = 'slapd'
+      $owner     = 'ldap'
+      $group     = 'ldap'
+
+      $server_pattern  = 'slapd'
+      $server_owner    = 'ldap'
+      $server_group    = 'ldap'
+
+      $schema_prefix   = "${prefix}/schema"
+      $db_prefix     = '/var/lib/ldap'
+
+      case $::architecture {
+        /^x86_64/: { 
+          $module_prefix = '/usr/lib64/openldap'
+        }
+
+        /^i?[346]86/: {
+          $module_prefix = '/usr/lib/openldap'
+        }
+
+        default: {
+          fail("Architecture not supported (${::architecture})")
+        }
+      }
+
+      $ssl_prefix    = '/etc/openldap/cacerts'
+      $server_run    = '/var/run/openldap'
+      $schema_base   = [ 'core', 'cosine', 'nis', 'inetorgperson', ]
+      $modules_base  = [ ]
+      $index_base    = [
+        'index objectclass  eq',
+        'index entryCSN     eq',
+        'index entryUUID    eq',
+        'index uidNumber    eq',
+        'index gidNumber    eq',
+        'index cn           pres,sub,eq',
+        'index sn           pres,sub,eq',
+        'index uid          pres,sub,eq',
+        'index displayName  pres,sub,eq',
+        ]
+    }
+
     /(?i:Debian|Ubuntu)/: {
 
       $package   = [ 'ldap-utils' ]
